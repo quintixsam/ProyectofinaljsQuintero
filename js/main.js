@@ -266,11 +266,11 @@ const products = [
 
 const contenedorProductos = document.querySelector("#contenedor-productos");
 const botonesCategorias = document.querySelectorAll(".boton-categoria");
-const principal = document.querySelectorAll("#principal");
+const principal = document.querySelector("#principal");
 let botonesAñadir = document.querySelectorAll(".producto-añadir");
+const numerito = document.querySelector("#numerito");
 
 function cargarProductos(productosElegidos) {
-
     contenedorProductos.innerHTML = "";
 
 
@@ -287,6 +287,8 @@ function cargarProductos(productosElegidos) {
         `;
         contenedorProductos.append(div);
     });
+
+    actualizarBotonesAñadir();
 }
 
 cargarProductos(products);
@@ -310,9 +312,45 @@ botonesCategorias.forEach(boton =>{
             cargarProductos(products);
         }
         
-    })
+    });
 });
 
 function actualizarBotonesAñadir() {
     botonesAñadir = document.querySelectorAll(".producto-añadir"); 
+
+    botonesAñadir.forEach(boton =>{
+        boton.addEventListener("click", añadirAlCarrito);
+    });
+}
+
+let productosEnCarrito;
+
+let productosEnCarritoLS = localStorage.getItem("productos-en-carrito");
+if (productosEnCarritoLS){
+    productosEnCarrito = JSON.parse(productosEnCarritoLS);
+    actualizarNumerito();
+} else {
+    productosEnCarrito = [];
+}
+
+function añadirAlCarrito(e) {
+    const idBoton = e.currentTarget.id;
+    const productoAñadido = products.find(producto => producto.id === idBoton);
+
+    if(productosEnCarrito.some(producto => producto.id === idBoton)) {
+        const index = productosEnCarrito.findIndex(producto => producto.id === idBoton);
+        productosEnCarrito[index].cantidad++;
+    } else {
+        productoAñadido.cantidad = 1;
+        productosEnCarrito.push(productoAñadido);
+    }
+
+    actualizarNumerito();
+
+    localStorage.setItem("productos-en-carrito", JSON.stringify(productosEnCarrito));
+}
+
+function actualizarNumerito(){
+    let nuevoNumerito = productosEnCarrito.reduce((acc, producto) => acc + producto.cantidad, 0);
+    numerito.innerText = nuevoNumerito;
 }
